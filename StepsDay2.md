@@ -1,16 +1,3 @@
-Awesome! Let’s jump into **Day 2** of your Docker Compose 30-day security-first project, focusing on practical learning,
-system hardening, and Trivy integration using a separate tools setup.
-
----
-
-### ✅ **Day 2: Secure Whoami with Trivy Scan (Hosted Separately)**
-
-#### 🎯 **Goal:**
-Deploy a secure [traefik/whoami](https://hub.docker.com/r/traefik/whoami) service with a security-first Docker 
-Compose config, and learn to run **Trivy scans manually** from a separate "tools" Docker Compose stack.
-
----
-
 ## 📁 Folder Structure
 
 ```
@@ -99,20 +86,3 @@ Or scan the entire folder:
 ```bash
 trivy fs /scandir/Day2_SecureWhoami
 ```
-
----
-
-## 🎓 What You’re Learning
-
-| Area | What You Learn |
-|------|----------------|
-| **Security** | Read-only FS, no-new-privileges, Trivy scanning |
-| **Lean & 6 Sigma** | Using minimal images, isolating tools, reusability |
-| **Operations** | Healthchecks, container naming, folder structuring |
-| **Tooling** | Trivy integration as a service, volume mounts for scanning |
-
----
-
-Would you like me to generate a **README.md** template for this day too, including scan command reference and outcomes?
-
-Let’s keep the momentum going! 🔐🔥
