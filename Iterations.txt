@@ -1,0 +1,180 @@
+Interation yamllint scan
+
+C:\Drive_D\Learning_Docker\DockerComposeDaily\Day2_SecureWhoami>yamllint docker-compose.yml
+docker-compose.yml
+  1:4       error    wrong new line character: expected \n  (new-lines)
+  13:6      warning  missing starting space in comment  (comments)
+
+---
+services:
+  whoami:
+    image: traefik/whoami:v1.11.0
+    container_name: secure-whoami
+    read_only: true
+    tmpfs:
+      - tmp
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "8080:80"
+    #health check for the service
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: "no"
+
+After resolution--
+
+C:\Drive_D\Learning_Docker\DockerComposeDaily\Day2_SecureWhoami>yamllint docker-compose.yml
+
+all resolved
+1. converted file to LR from CRLF to use unix-style line Ending
+2. add spaces to line comment for health check 
+
+---
+services:
+  whoami:
+    image: traefik/whoami:v1.11.0
+    container_name: secure-whoami
+    read_only: true
+    tmpfs:
+      - tmp
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "8080:80"
+    #  health check for the service
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: "no"
+
+
+---------==========================-------------
+
+Lets take steps 
+🛠️ Step-by-Step: What To Do
+🧱 1. Set up Day 2 project
+Create the folder Day2_SecureWhoami
+
+Add the Docker Compose file
+
+Run:
+
+cd DockerComposeDaily/Day2_SecureWhoami
+docker compose up -d
+🔎 2. Set up Trivy (hosted in Tools)
+Navigate to Tools/Trivy
+
+Start the Trivy container:
+
+cd DockerComposeDaily/Tools/Trivy
+docker compose up -d
+🧪 3. Run Trivy scan manually from the Trivy container
+
+docker exec -it trivy-cli sh
+Inside the container, run this to scan whoami image:
+
+
+trivy image traefik/whoami:v1.8.6
+Or scan the entire folder:
+
+trivy fs /scandir/Day2_SecureWhoami
+
+
+_________________
+Test Run
+MY understanding that -- docker exec -it trivy-cli sh
+Takes me inside a container which alpine linux shell
+and has trivy cli tool already installed and for ease
+of use we have name container trivy-cli..
+
+docker exec -it trivy-cli sh 
+# Now Inside the container, run this to scan whoami image:
+
+Secondly, we have mounted volume /scandir which is current directory folder.
+But observation changed to ../../ to mount it to DockerComposeDaily
+which help us browse and scan files directory using trivy 
+
+scan the entire folder:
+trivy fs /scandir/Day2_SecureWhoami
+
+Further, Below command help trivy pull image defined and scan it and give a report.
+So we can scan for unlimited images till the files registry is reachable.
+trivy image traefik/whoami:v1.8.6
+
+C:\Drive_D\Learning_Docker\DockerComposeDaily\Tools\Trivy>docker exec -it trivy-c
+li sh
+/ # pwd
+/
+/ # ls
+bin      etc      media    proc     sbin     sys      var
+contrib  home     mnt      root     scandir  tmp
+dev      lib      opt      run      srv      usr
+/ # cd /scandir/
+/scandir # ls 
+Day1
+Day2_SecureWhoami
+Structured_Document.docx
+Tools
+ToolswithSecurity.txt
+docker_compose_30days_security_first.xlsx
+/scandir # trivy fs /scandir/Day2_SecureWhoami
+2025-04-05T17:58:19Z    INFO    [vulndb] Need to update DB
+2025-04-05T17:58:19Z    INFO    [vulndb] Downloading vulnerability DB...
+2025-04-05T17:58:19Z    INFO    [vulndb] Downloading artifact...        repo="mirror.gcr.io/aquasec/trivy-db:2"
+61.93 MiB / 61.93 MiB [--------------------------------] 100.00% 2.15 MiB p/s 29s
+2025-04-05T17:58:51Z    INFO    [vulndb] Artifact successfully downloaded       repo="mirror.gcr.io/aquasec/trivy-db:2"
+2025-04-05T17:58:51Z    INFO    [vuln] Vulnerability scanning is enabled
+2025-04-05T17:58:51Z    INFO    [secret] Secret scanning is enabled
+2025-04-05T17:58:51Z    INFO    [secret] If your scanning is slow, please try '--scanners vuln' to disable secret scanning
+2025-04-05T17:58:51Z    INFO    [secret] Please see also https://trivy.dev/v0.61/docs/scanner/secret#recommendation for faster secret detection
+2025-04-05T17:58:51Z    INFO    Number of language-specific files       num=0
+2025-04-05T17:58:51Z    WARN    [report] Supported files for scanner(s) not found.       scanners=[vuln]
+2025-04-05T17:58:51Z    INFO    [report] No issues detected with scanner(s).    scanners=[secret]
+
+Report Summary
+
+┌────────┬──────┬─────────────────┬─────────┐
+│ Target │ Type │ Vulnerabilities │ Secrets │
+├────────┼──────┼─────────────────┼─────────┤
+│   -    │  -   │        -        │    -    │
+└────────┴──────┴─────────────────┴─────────┘
+Legend:
+- '-': Not scanned
+- '0': Clean (no security findings detected)
+
+/scandir #
+
+
+Important : More healthcheck
+
+
+CONTAINER ID   IMAGE                    COMMAND               CREATED          STATUS                             PORTS                  NAMES
+3aba0f91962f   traefik/whoami:v1.11.0   "/whoami"             16 seconds ago   Up 15 seconds (health: starting)   0.0.0.0:8080->80/tcp   secure-whoami
+
+
+---
+services:
+  whoami:
+    image: traefik/whoami:v1.11.0
+    container_name: secure-whoami
+    read_only: true
+    tmpfs:
+      - /tmp
+    #  tmp --is incorrect use tmps - /tmp  — the path must be absolute.
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "8080:80"
+    #  health check for the service
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: "no"
